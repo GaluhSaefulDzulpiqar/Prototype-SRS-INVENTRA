@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INVENTRA — Universitas Siliwangi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .bg-teal-inventra { background-color: #0B5563; }
+    .bg-teal-inventra-dark { background-color: #083F49; }
+    .text-teal-inventra { color: #0B5563; }
+    .border-teal-inventra { border-color: #0B5563; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased">
+
+  <!-- =====================================================================
+       1. HALAMAN AUTENTIKASI (SINGLE LOGIN / SIGN UP / FORGOT PASS)
+       Sesuai Wireframe Figma: Split-Screen (Gambar Kiri, Form Putih Kanan)
+  ====================================================================== -->
+  <div id="auth-wrapper" class="min-h-screen flex flex-col md:flex-row bg-white">
+    <!-- Sisi Kiri: Ilustrasi Lanskap -->
+    <div class="hidden md:flex md:w-1/2 relative bg-slate-900 overflow-hidden">
+      <img 
+        src="https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80" 
+        alt="Lanskap INVENTRA" 
+        class="w-full h-full object-cover opacity-90"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-10 text-white">
+        <span class="text-xs uppercase tracking-widest text-teal-300 font-semibold mb-1">Sistem Informasi Inventaris Ormawa</span>
+        <h2 class="text-3xl font-bold">INVENTRA UNSIL</h2>
+        <p class="text-sm text-slate-200 mt-2 max-w-md">
+          Platform peminjaman sarana & prasarana terintegrasi dengan pemantauan stok real-time dan inspeksi digital 2 arah.
+        </p>
+      </div>
+    </div>
+
+    <!-- Sisi Kanan: Formulir Autentikasi -->
+    <div class="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12">
+      <div class="w-full max-w-md">
+        <!-- Logo & Header -->
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 rounded-full bg-slate-100 border-2 border-teal-inventra mx-auto flex items-center justify-center mb-3 shadow-sm">
+            <i data-lucide="boxes" class="w-8 h-8 text-teal-inventra"></i>
+          </div>
+          <p class="text-xs font-semibold tracking-wider text-slate-500 uppercase">Universitas Siliwangi</p>
+          <h1 class="text-2xl font-bold text-teal-inventra mt-1">WELCOME TO INVENTRA</h1>
+        </div>
+
+        <!-- Alert Notifikasi -->
+        <div id="auth-alert" class="hidden mb-4 p-3 rounded-lg text-sm font-medium"></div>
+
+        <!-- FORM 1: SINGLE LOGIN UNIVERSAL -->
+        <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Email Kampus / Akun</label>
+            <input type="email" id="login-email" required placeholder="nama@student.unsil.ac.id"
+              class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-teal-inventra" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Kata Sandi</label>
+            <input type="password" id="login-password" required placeholder="••••••••"
+              class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-teal-inventra" />
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <label class="flex items-center gap-2 text-slate-600 cursor-pointer">
+              <input type="checkbox" class="rounded text-teal-inventra" /> Ingat sesi saya
+            </label>
+            <button type="button" onclick="switchAuthTab('forgot')" class="text-teal-inventra font-semibold hover:underline">
+              Lupa Password?
+            </button>
+          </div>
+          <div class="pt-2 flex gap-3">
+            <button type="button" onclick="switchAuthTab('signup')"
+              class="w-1/2 py-2.5 border border-slate-800 text-slate-800 rounded-lg text-sm font-semibold hover:bg-slate-100 transition">
+              Sign Up
+            </button>
+            <button type="submit"
+              class="w-1/2 py-2.5 bg-teal-inventra text-white rounded-lg text-sm font-semibold hover:bg-teal-inventra-dark transition shadow-sm">
+              Login
+            </button>
+          </div>
+
+          <!-- Panel Bantu Pengujian Simulasi (Hanya untuk Demo) -->
+          <div class="mt-6 p-3.5 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-xs text-slate-600">
+            <p class="font-semibold text-slate-700 mb-1.5">⚡ Simulasi Auto-Redirect (Klik untuk isi otomatis):</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="fillDemoAccount('peminjam')" class="px-2.5 py-1 bg-white border border-slate-300 rounded hover:border-teal-inventra text-slate-700">
+                Akun Peminjam (Mahasiswa)
+              </button>
+              <button type="button" onclick="fillDemoAccount('admin')" class="px-2.5 py-1 bg-white border border-slate-300 rounded hover:border-teal-inventra text-slate-700">
+                Akun Admin (Sarpras)
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- FORM 2: SIGN UP (OTOMATIS ROLE = PEMINJAM) -->
+        <form id="form-signup" onsubmit="handleSignUp(event)" class="hidden space-y-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nama Lengkap & Ormawa</label>
+            <input type="text" id="reg-name" required placeholder="Contoh: Galuh — BEM FT"
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-teal-inventra" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Email Mahasiswa</label>
+            <input type="email" id="reg-email" required placeholder="npm@student.unsil.ac.id"
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-teal-inventra" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Kata Sandi</label>
+            <input type="password" id="reg-password" required placeholder="Minimal 6 karakter"
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-teal-inventra" />
+          </div>
+          <p class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded">
+            * Pendaftaran mandiri otomatis terdaftar sebagai peran <b>Peminjam</b>.
+          </p>
+          <div class="pt-1 flex gap-3">
+            <button type="button" onclick="switchAuthTab('login')"
+              class="w-1/2 py-2.5 border border-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50">
+              Kembali
+            </button>
+            <button type="submit"
+              class="w-1/2 py-2.5 bg-teal-inventra text-white rounded-lg text-sm font-semibold hover:bg-teal-inventra-dark">
+              Daftar Akun
+            </button>
+          </div>
+        </form>
+
+        <!-- FORM 3: FORGOT PASSWORD -->
+        <form id="form-forgot" onsubmit="handleForgotPass(event)" class="hidden space-y-4">
+          <p class="text-xs text-slate-600 text-center">Masukkan email terdaftar untuk mengatur ulang kata sandi Anda.</p>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Email Terdaftar</label>
+            <input type="email" id="forgot-email" required placeholder="nama@student.unsil.ac.id"
+              class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-teal-inventra" />
+          </div>
+          <div class="flex gap-3">
+            <button type="button" onclick="switchAuthTab('login')"
+              class="w-1/2 py-2.5 border border-slate-300 text-slate-700 rounded-lg text-sm font-semibold">
+              Batal
+            </button>
+            <button type="submit"
+              class="w-1/2 py-2.5 bg-teal-inventra text-white rounded-lg text-sm font-semibold">
+              Reset Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       2. APLIKASI UTAMA (DASHBOARD PEMINJAM & DASHBOARD ADMIN)
+       Sesuai Wireframe Figma: Sidebar Teal Kiri + Konten Putih Kanan
+  ====================================================================== -->
+  <div id="app-wrapper" class="hidden min-h-screen flex flex-col md:flex-row">
+    
+    <!-- SIDEBAR TEAL KIRI -->
+    <aside class="w-full md:w-64 bg-teal-inventra text-white flex flex-col justify-between shrink-0">
+      <div>
+        <!-- Profil Avatar & Role -->
+        <div class="p-6 text-center border-b border-white/15">
+          <div class="w-20 h-20 rounded-full bg-slate-200 mx-auto flex items-center justify-center text-teal-inventra font-bold text-2xl shadow-inner mb-3">
+            <i data-lucide="user" class="w-10 h-10"></i>
+          </div>
+          <span id="sidebar-role-badge" class="inline-block px-3 py-0.5 rounded-full text-xs font-bold tracking-wider uppercase bg-white/15 text-white">
+            ROLE
+          </span>
+          <p id="sidebar-user-name" class="text-sm font-medium text-teal-100 mt-2 truncate">Nama Pengguna</p>
+        </div>
+
+        <!-- Menu Navigasi (Sesuai Wireframe Figma) -->
+        <nav class="p-4 space-y-1.5" id="sidebar-menu">
+          <button onclick="navigateTo('dasboard')" data-menu="dasboard"
+            class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition bg-white/20 text-white">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            <span>Dasboard</span>
+          </button>
+          <button onclick="navigateTo('pengajuan')" data-menu="pengajuan"
+            class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition text-teal-100 hover:bg-white/10">
+            <i data-lucide="inbox" class="w-4 h-4"></i>
+            <span>Pengajuan</span>
+          </button>
+          <button onclick="navigateTo('dipinjamkan')" data-menu="dipinjamkan"
+            class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition text-teal-100 hover:bg-white/10">
+            <i data-lucide="file-check-2" class="w-4 h-4"></i>
+            <span>Dipinjamkan</span>
+          </button>
+          <hr class="border-white/20 my-3" />
+          <button onclick="navigateTo('laporan')" data-menu="laporan"
+            class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition text-teal-100 hover:bg-white/10">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span>Laporan Item</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tombol Uji Middleware & Logout -->
+      <div class="p-4 border-t border-white/15 space-y-2">
+        <button onclick="testMiddlewareProtection()"
+          class="w-full py-2 px-3 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs font-medium flex items-center justify-center gap-2 transition">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <span>Uji Proteksi URL Admin</span>
+        </button>
+        <button onclick="handleLogout()"
+          class="w-full py-2.5 px-4 rounded-lg bg-red-500/80 hover:bg-red-600 text-white text-sm font-semibold flex items-center justify-center gap-2 transition">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span>Keluar (Logout)</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- AREA KONTEN PUTIH KANAN -->
+    <main class="flex-1 bg-white flex flex-col">
+      <!-- Top Header -->
+      <header class="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-50/60">
+        <div>
+          <h2 class="text-lg font-bold tracking-tight text-slate-800">WELCOME TO INVENTRA</h2>
+          <p id="page-subtitle" class="text-xs text-slate-500">Sistem Manajemen Peminjaman Inventaris Ormawa</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Google Calendar Sync Aktif
+          </span>
+        </div>
+      </header>
+
+      <!-- Container Dinamis Halaman -->
+      <div id="main-content" class="p-6 flex-1 overflow-y-auto"></div>
+    </main>
+  </div>
+
+  <!-- MODAL PRATINJAU DOKUMEN / BUKTI PDF -->
+  <div id="modal-overlay" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
+      <div class="flex items-center justify-between border-b pb-3 mb-4">
+        <h3 id="modal-title" class="font-bold text-slate-800">Detail Dokumen</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modal-body" class="text-sm text-slate-600 space-y-3"></div>
+      <div class="mt-6 flex justify-end gap-2">
+        <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium">
+          Tutup
+        </button>
+        <button id="modal-print-btn" onclick="window.print()" class="hidden px-4 py-2 bg-teal-inventra text-white rounded-lg text-sm font-medium">
+          Cetak / Simpan PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       3. LOGIKA JAVASCRIPT (SIMULASI DATABASE, RBAC & ALUR TRANSAKSI)
+  ====================================================================== -->
+  <script>
+    // ---------------------------------------------------------------------
+    // A. SIMULASI DATABASE (TABEL USERS, INVENTARIS, PEMINJAMAN)
+    // ---------------------------------------------------------------------
+    const dbUsers = [
+      { id: 1, name: 'Pengurus Sarpras (Admin)', email: 'admin@unsil.ac.id', password: '123', role: 'admin' },
+      { id: 2, name: 'Galuh — BEM FT', email: 'galuh@student.unsil.ac.id', password: '123', role: 'peminjam' }
+    ];
+
+    let dbInventaris = [
+      { id: 'INV-01', name: 'Proyektor Epson EB-X500', category: 'Proyektor', total: 3, available: 2, condition: 'Baik', img: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80' },
+      { id: 'INV-02', name: 'Kamera DSLR Canon EOS 80D', category: 'Kamera', total: 2, available: 1, condition: 'Baik', img: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&q=80' },
+      { id: 'INV-03', name: 'Sound System Portable Huper', category: 'Sound System', total: 2, available: 2, condition: 'Baik', img: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=400&q=80' },
+      { id: 'INV-04', name: 'Lighting Studio Godox SL-60W', category: 'Lighting', total: 4, available: 4, condition: 'Baik', img: 'https://images.unsplash.com/photo-1527011046414-4781f1f94f8c?auto=format&fit=crop&w=400&q=80' }
+    ];
+
+    let dbPeminjaman = [
+      {
+        id: 'TRX-202601',
+        peminjam: 'Galuh — BEM FT',
+        itemId: 'INV-01',
+        itemName: 'Proyektor Epson EB-X500',
+        qty: 1,
+        tglPinjam: '2026-11-18',
+        tglKembali: '2026-11-20',
+        kegiatan: 'Seminar Nasional Teknologi Informasi',
+        spmjFile: 'SPMJ_BEMFT_Semnas.pdf',
+        status: 'Menunggu Persetujuan', // Menunggu Persetujuan | Disetujui | Sedang Dipinjam | Selesai | Ditolak | Dibatalkan
+        alasanTolak: '',
+        fotoAwal: '',
+        kondisiAwal: '',
+        fotoAkhir: '',
+        kondisiAkhir: ''
+      },
+      {
+        id: 'TRX-202602',
+        peminjam: 'Regita — HMTI',
+        itemId: 'INV-02',
+        itemName: 'Kamera DSLR Canon EOS 80D',
+        qty: 1,
+        tglPinjam: '2026-11-16',
+        tglKembali: '2026-11-17',
+        kegiatan: 'Dokumentasi Pelantikan Pengurus',
+        spmjFile: 'SPMJ_HMTI_Pelantikan.pdf',
+        status: 'Sedang Dipinjam',
+        alasanTolak: '',
+        fotoAwal: 'foto_checkout_kamera.jpg',
+        kondisiAwal: 'Lensa bersih, baterai 100%, tas lengkap',
+        fotoAkhir: '',
+        kondisiAkhir: ''
+      }
+    ];
+
+    let currentUser = null;
+    let currentTab = 'dasboard';
+    let selectedCategory = 'Semua';
+    let searchQuery = '';
+
+    // ---------------------------------------------------------------------
+    // B. LOGIKA AUTENTIKASI & SINGLE LOGIN AUTO-REDIRECT
+    // ---------------------------------------------------------------------
+    function fillDemoAccount(role) {
+      if (role === 'admin') {
+        document.getElementById('login-email').value = 'admin@unsil.ac.id';
+        document.getElementById('login-password').value = '123';
+      } else {
+        document.getElementById('login-email').value = 'galuh@student.unsil.ac.id';
+        document.getElementById('login-password').value = '123';
+      }
+    }
+
+    function switchAuthTab(tab) {
+      document.getElementById('auth-alert').classList.add('hidden');
+      document.getElementById('form-login').classList.add('hidden');
+      document.getElementById('form-signup').classList.add('hidden');
+      document.getElementById('form-forgot').classList.add('hidden');
+      document.getElementById(`form-${tab}`).classList.remove('hidden');
+    }
+
+    function showAuthAlert(msg, isError = true) {
+      const box = document.getElementById('auth-alert');
+      box.textContent = msg;
+      box.className = `mb-4 p-3 rounded-lg text-sm font-medium ${isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`;
+      box.classList.remove('hidden');
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
+
+      const user = dbUsers.find(u => u.email === email && u.password === pass);
+      if (!user) {
+        showAuthAlert('Email atau kata sandi tidak cocok!');
+        return;
+      }
+
+      // LOGIKA INTI AUTO-REDIRECT BERDASARKAN ROLE
+      currentUser = user;
+      document.getElementById('auth-wrapper').classList.add('hidden');
+      document.getElementById('app-wrapper').classList.remove('hidden');
+
+      document.getElementById('sidebar-role-badge').textContent = user.role.toUpperCase();
+      document.getElementById('sidebar-user-name').textContent = user.name;
+
+      if (user.role === 'admin') {
+        window.location.hash = '#/admin/dasboard';
+      } else {
+        window.location.hash = '#/peminjam/dasboard';
+      }
+
+      navigateTo('dasboard');
+    }
+
+    function handleSignUp(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+
+      if (dbUsers.some(u => u.email === email)) {
+        showAuthAlert('Email sudah terdaftar!');
+        return;
+      }
+
+      // Pendaftaran mandiri dikunci otomatis menjadi role: 'peminjam'
+      dbUsers.push({ id: dbUsers.length + 1, name, email, password, role: 'peminjam' });
+      switchAuthTab('login');
+      document.getElementById('login-email').value = email;
+      showAuthAlert('Registrasi berhasil sebagai Peminjam! Silakan login.', false);
+    }
+
+    function handleForgotPass(e) {
+      e.preventDefault();
+      switchAuthTab('login');
+      showAuthAlert('Tautan pengaturan ulang kata sandi telah dikirim ke email Anda.', false);
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      window.location.hash = '';
+      document.getElementById('app-wrapper').classList.add('hidden');
+      document.getElementById('auth-wrapper').classList.remove('hidden');
+      switchAuthTab('login');
+    }
+
+    // Simulasi Middleware Proteksi Halaman Admin (SK-NF-02)
+    function testMiddlewareProtection() {
+      if (currentUser.role !== 'admin') {
+        alert('⛔ 403 FORBIDDEN (Middleware RBAC):\nAkses ditolak! Akun dengan peran PEMINJAM dilarang mengakses rute /admin/dashboard.');
+      } else {
+        alert('✅ 200 OK (Middleware RBAC):\nSesi terverifikasi sebagai ADMIN. Akses rute diizinkan.');
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // C. NAVIGASI SIDEBAR & RENDER TAMPILAN
+    // ---------------------------------------------------------------------
+    function navigateTo(tab) {
+      currentTab = tab;
+      window.location.hash = `#/${currentUser.role}/${tab}`;
+
+      // Highlight active menu
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.menu === tab) {
+          btn.classList.add('bg-white/20', 'text-white');
+          btn.classList.remove('text-teal-100');
+        } else {
+          btn.classList.remove('bg-white/20', 'text-white');
+          btn.classList.add('text-teal-100');
+        }
+      });
+
+      const container = document.getElementById('main-content');
+      if (currentUser.role === 'peminjam') {
+        renderPeminjamView(tab, container);
+      } else {
+        renderAdminView(tab, container);
+      }
+      lucide.createIcons();
+    }
+
+    // ---------------------------------------------------------------------
+    // D. TAMPILAN ROLE: PEMINJAM (MAHASISWA / PANITIA)
+    // ---------------------------------------------------------------------
+    function renderPeminjamView(tab, container) {
+      const subtitle = document.getElementById('page-subtitle');
+
+      if (tab === 'dasboard') {
+        subtitle.textContent = 'Katalog Inventaris & Kalender Ketersediaan Real-Time';
+        const categories = ['Semua', 'Proyektor', 'Kamera', 'Sound System', 'Lighting'];
+        const filtered = dbInventaris.filter(item => {
+          const matchCat = selectedCategory === 'Semua' || item.category === selectedCategory;
+          const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchCat && matchSearch;
+        });
+
+        container.innerHTML = `
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Katalog Barang (2 Kolom) -->
+            <div class="lg:col-span-2 space-y-4">
+              <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" value="${searchQuery}" oninput="searchQuery = this.value; navigateTo('dasboard')"
+                  placeholder="Cari nama barang inventaris..."
+                  class="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-teal-inventra" />
+              </div>
+              <div class="flex flex-wrap gap-2">
+                ${categories.map(cat => `
+                  <button onclick="selectedCategory='${cat}'; navigateTo('dasboard')"
+                    class="px-3 py-1.5 rounded-full text-xs font-semibold transition ${selectedCategory === cat ? 'bg-teal-inventra text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                    ${cat}
+                  </button>
+                `).join('')}
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                ${filtered.map(item => `
+                  <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-white flex flex-col">
+                    <img src="${item.img}" alt="${item.name}" class="h-36 w-full object-cover bg-slate-100" />
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                          <span class="text-[11px] font-semibold text-teal-inventra bg-teal-50 px-2 py-0.5 rounded">${item.category}</span>
+                          <span class="text-xs font-bold ${item.available > 0 ? 'text-emerald-600' : 'text-red-600'}">
+                            Tersedia: ${item.available}/${item.total} Unit
+                          </span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm mt-1">${item.name}</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">Kondisi Fisik: ${item.condition}</p>
+                      </div>
+                      <button onclick="prefillAjukan('${item.id}')" ${item.available === 0 ? 'disabled' : ''}
+                        class="mt-4 w-full py-2 rounded-lg text-xs font-semibold transition ${item.available > 0 ? 'bg-teal-inventra hover:bg-teal-inventra-dark text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}">
+                        ${item.available > 0 ? 'Ajukan Peminjaman' : 'Stok Habis'}
+                      </button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Widget Kalender Ketersediaan Real-Time (Google Calendar) -->
+            <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/70 h-fit">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-sm text-slate-800">Kalender Ketersediaan</h3>
+                <span class="text-xs font-semibold text-teal-inventra">November 2026</span>
+              </div>
+              <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-slate-400 mb-1">
+                <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>
+              </div>
+              <div class="grid grid-cols-7 gap-1 text-center text-xs">
+                ${Array.from({ length: 30 }, (_, i) => {
+                  const day = i + 1;
+                  const isBooked = [16, 17, 18, 19, 20].includes(day);
+                  return `<div class="py-1.5 rounded font-medium ${isBooked ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-white text-slate-700 border border-slate-200'}">${day}</div>`;
+                }).join('')}
+              </div>
+              <div class="mt-4 space-y-1.5 text-xs text-slate-600 border-t pt-3">
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-white border border-slate-300"></span> Tersedia (Kosong)</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-amber-100 border border-amber-300"></span> Sebagian Dipinjam (Cek Stok)</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (tab === 'pengajuan') {
+        subtitle.textContent = 'Formulir Pengajuan Peminjaman Daring (Minimal H-2)';
+        container.innerHTML = `
+          <div class="max-w-2xl border border-slate-200 rounded-xl p-6 bg-white shadow-sm">
+            <h3 class="font-bold text-base text-slate-800 mb-4">Buat Permohonan Peminjaman Baru</h3>
+            <form onsubmit="submitPeminjaman(event)" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Barang Inventaris</label>
+                  <select id="ajukan-item" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                    ${dbInventaris.map(i => `<option value="${i.id}">${i.name} (Tersedia: ${i.available})</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Unit</label>
+                  <input type="number" id="ajukan-qty" min="1" max="3" value="1" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Mulai Pinjam</label>
+                  <input type="date" id="ajukan-tgl-pinjam" value="2026-11-22" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Pengembalian</label>
+                  <input type="date" id="ajukan-tgl-kembali" value="2026-11-24" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Kegiatan / Kepanitiaan</label>
+                <input type="text" id="ajukan-kegiatan" required placeholder="Contoh: Musyawarah Besar Mahasiswa"
+                  class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Unggah Berkas Perizinan (SPMJ — PDF/JPG)</label>
+                <input type="file" id="ajukan-spmj" accept=".pdf,.jpg,.jpeg,.png" required
+                  class="w-full text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-inventra hover:file:bg-teal-100 border border-slate-300 rounded-lg p-1.5" />
+              </div>
+
+              <button type="submit" class="w-full py-2.5 bg-teal-inventra hover:bg-teal-inventra-dark text-white rounded-lg text-sm font-semibold transition">
+                Kirim Pengajuan Peminjaman
+              </button>
+            </form>
+          </div>
+        `;
+      }
+
+      if (tab === 'dipinjamkan' || tab === 'laporan') {
+        const isHistory = tab === 'laporan';
+        subtitle.textContent = isHistory ? 'Riwayat Seluruh Transaksi Peminjaman' : 'Status Pengajuan & Pinjaman Aktif';
+        const myLoans = dbPeminjaman.filter(p => isHistory ? true : ['Menunggu Persetujuan', 'Disetujui', 'Sedang Dipinjam'].includes(p.status));
+
+        container.innerHTML = `
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
+                  <tr>
+                    <th class="p-3.5">ID Transaksi</th>
+                    <th class="p-3.5">Barang & Jumlah</th>
+                    <th class="p-3.5">Jadwal Pinjam</th>
+                    <th class="p-3.5">Status</th>
+                    <th class="p-3.5">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  ${myLoans.map(trx => `
+                    <tr>
+                      <td class="p-3.5 font-semibold text-slate-800">${trx.id}</td>
+                      <td class="p-3.5">
+                        <div class="font-medium text-slate-800">${trx.itemName} (${trx.qty} Unit)</div>
+                        <div class="text-xs text-slate-500">${trx.kegiatan}</div>
+                      </td>
+                      <td class="p-3.5 text-xs text-slate-600">${trx.tglPinjam} s.d. ${trx.tglKembali}</td>
+                      <td class="p-3.5">${renderStatusBadge(trx.status)}</td>
+                      <td class="p-3.5 space-x-2">
+                        ${trx.status === 'Menunggu Persetujuan' ? `
+                          <button onclick="cancelPeminjaman('${trx.id}')" class="px-2.5 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-xs font-semibold">
+                            Batalkan
+                          </button>
+                        ` : ''}
+                        ${['Disetujui', 'Sedang Dipinjam', 'Selesai'].includes(trx.status) ? `
+                          <button onclick="openBuktiModal('${trx.id}')" class="px-2.5 py-1 bg-teal-50 text-teal-inventra hover:bg-teal-100 rounded text-xs font-semibold">
+                            Bukti Persetujuan (PDF)
+                          </button>
+                        ` : ''}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function prefillAjukan(itemId) {
+      navigateTo('pengajuan');
+      setTimeout(() => {
+        const select = document.getElementById('ajukan-item');
+        if (select) select.value = itemId;
+      }, 50);
+    }
+
+    function submitPeminjaman(e) {
+      e.preventDefault();
+      const itemId = document.getElementById('ajukan-item').value;
+      const qty = parseInt(document.getElementById('ajukan-qty').value);
+      const tglPinjam = document.getElementById('ajukan-tgl-pinjam').value;
+      const tglKembali = document.getElementById('ajukan-tgl-kembali').value;
+      const kegiatan = document.getElementById('ajukan-kegiatan').value;
+      const fileInput = document.getElementById('ajukan-spmj');
+      const spmjFile = fileInput.files[0] ? fileInput.files[0].name : 'Berkas_SPMJ.pdf';
+
+      const item = dbInventaris.find(i => i.id === itemId);
+      if (qty > item.available) {
+        alert('Jumlah unit melebihi stok tersedia saat ini!');
+        return;
+      }
+
+      dbPeminjaman.unshift({
+        id: 'TRX-' + Math.floor(100000 + Math.random() * 900000),
+        peminjam: currentUser.name,
+        itemId: item.id,
+        itemName: item.name,
+        qty,
+        tglPinjam,
+        tglKembali,
+        kegiatan,
+        spmjFile,
+        status: 'Menunggu Persetujuan',
+        alasanTolak: '',
+        fotoAwal: '',
+        kondisiAwal: '',
+        fotoAkhir: '',
+        kondisiAkhir: ''
+      });
+
+      alert('Pengajuan berhasil dikirim! Silakan tunggu persetujuan Admin.');
+      navigateTo('dipinjamkan');
+    }
+
+    function cancelPeminjaman(trxId) {
+      const trx = dbPeminjaman.find(t => t.id === trxId);
+      if (trx) {
+        trx.status = 'Dibatalkan';
+        navigateTo(currentTab);
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // E. TAMPILAN ROLE: ADMIN (PENGURUS SARPRAS & PENYETUJU)
+    // ---------------------------------------------------------------------
+    function renderAdminView(tab, container) {
+      const subtitle = document.getElementById('page-subtitle');
+
+      if (tab === 'dasboard') {
+        subtitle.textContent = 'Pusat Pemantauan Stok Real-Time & Ringkasan Operasional';
+        const totalUnit = dbInventaris.reduce((s, i) => s + i.total, 0);
+        const availUnit = dbInventaris.reduce((s, i) => s + i.available, 0);
+        const borrowedUnit = totalUnit - availUnit;
+        const pendingCount = dbPeminjaman.filter(p => p.status === 'Menunggu Persetujuan').length;
+
+        container.innerHTML = `
+          <!-- 4 Summary Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-sm">
+              <p class="text-xs font-semibold text-slate-500">Total Inventaris</p>
+              <p class="text-2xl font-bold text-slate-800 mt-1">${totalUnit} Unit</p>
+            </div>
+            <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 shadow-sm">
+              <p class="text-xs font-semibold text-emerald-700">Stok Tersedia</p>
+              <p class="text-2xl font-bold text-emerald-700 mt-1">${availUnit} Unit</p>
+            </div>
+            <div class="p-4 rounded-xl border border-blue-200 bg-blue-50/50 shadow-sm">
+              <p class="text-xs font-semibold text-blue-700">Sedang Dipinjam</p>
+              <p class="text-2xl font-bold text-blue-700 mt-1">${borrowedUnit} Unit</p>
+            </div>
+            <div onclick="navigateTo('pengajuan')" class="cursor-pointer p-4 rounded-xl border border-amber-200 bg-amber-50/50 shadow-sm hover:border-amber-400 transition">
+              <p class="text-xs font-semibold text-amber-700">Permohonan Baru ↗</p>
+              <p class="text-2xl font-bold text-amber-700 mt-1">${pendingCount} Ajuan</p>
+            </div>
+          </div>
+
+          <!-- Tabel Monitoring Stok Real-Time -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+              <h3 class="font-bold text-sm text-slate-800">Monitoring Stok Inventaris Real-Time</h3>
+              <button onclick="navigateTo('laporan')" class="text-xs font-semibold text-teal-inventra hover:underline">+ Kelola Master Barang</button>
+            </div>
+            <table class="w-full text-left border-collapse text-sm">
+              <thead class="bg-slate-50/50 border-b border-slate-200 text-xs uppercase text-slate-500">
+                <tr>
+                  <th class="p-3.5">Kode</th>
+                  <th class="p-3.5">Nama Barang</th>
+                  <th class="p-3.5">Kategori</th>
+                  <th class="p-3.5">Stok Total</th>
+                  <th class="p-3.5">Tersedia</th>
+                  <th class="p-3.5">Kondisi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                ${dbInventaris.map(item => `
+                  <tr>
+                    <td class="p-3.5 font-mono text-xs text-slate-500">${item.id}</td>
+                    <td class="p-3.5 font-semibold text-slate-800">${item.name}</td>
+                    <td class="p-3.5 text-xs text-slate-600">${item.category}</td>
+                    <td class="p-3.5">${item.total}</td>
+                    <td class="p-3.5 font-bold ${item.available > 0 ? 'text-emerald-600' : 'text-red-600'}">${item.available}</td>
+                    <td class="p-3.5"><span class="px-2 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-700 font-medium">${item.condition}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      if (tab === 'pengajuan') {
+        subtitle.textContent = 'Approval Dashboard — Verifikasi Berkas SPMJ & Otorisasi Peminjaman';
+        container.innerHTML = `
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
+                  <tr>
+                    <th class="p-3.5">Peminjam / Ormawa</th>
+                    <th class="p-3.5">Barang & Jadwal</th>
+                    <th class="p-3.5">Berkas SPMJ</th>
+                    <th class="p-3.5">Status</th>
+                    <th class="p-3.5">Otorisasi</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  ${dbPeminjaman.map(trx => `
+                    <tr>
+                      <td class="p-3.5">
+                        <div class="font-bold text-slate-800">${trx.peminjam}</div>
+                        <div class="text-xs text-slate-500">${trx.kegiatan}</div>
+                      </td>
+                      <td class="p-3.5">
+                        <div class="font-medium text-slate-800">${trx.itemName} (${trx.qty} Unit)</div>
+                        <div class="text-xs text-slate-500">${trx.tglPinjam} s.d. ${trx.tglKembali}</div>
+                      </td>
+                      <td class="p-3.5">
+                        <button onclick="openSpmjModal('${trx.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium inline-flex items-center gap-1">
+                          <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Lihat Surat
+                        </button>
+                      </td>
+                      <td class="p-3.5">${renderStatusBadge(trx.status)}</td>
+                      <td class="p-3.5">
+                        ${trx.status === 'Menunggu Persetujuan' ? `
+                          <div class="flex gap-2">
+                            <button onclick="approveRequest('${trx.id}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold">
+                              Setujui
+                            </button>
+                            <button onclick="rejectRequest('${trx.id}')" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold">
+                              Tolak
+                            </button>
+                          </div>
+                        ` : `<span class="text-xs text-slate-400">Telah diproses</span>`}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      if (tab === 'dipinjamkan') {
+        subtitle.textContent = 'Konfirmasi Serah-Terima & Inspeksi Fisik 2 Arah (Tanpa QR Code)';
+        const activeOps = dbPeminjaman.filter(t => ['Disetujui', 'Sedang Dipinjam'].includes(t.status));
+
+        container.innerHTML = `
+          <div class="space-y-4">
+            ${activeOps.length === 0 ? `<p class="text-sm text-slate-500 p-6 border rounded-xl text-center">Belum ada transaksi berstatus Disetujui atau Sedang Dipinjam.</p>` : ''}
+            ${activeOps.map(trx => `
+              <div class="border border-slate-200 rounded-xl p-5 bg-white shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                  <div>
+                    <span class="text-xs font-mono text-slate-400">${trx.id}</span>
+                    <h4 class="font-bold text-slate-800">${trx.itemName} (${trx.qty} Unit) — ${trx.peminjam}</h4>
+                    <p class="text-xs text-slate-500">Jadwal: ${trx.tglPinjam} s.d. ${trx.tglKembali}</p>
+                  </div>
+                  <div>${renderStatusBadge(trx.status)}</div>
+                </div>
+
+                ${trx.status === 'Disetujui' ? `
+                  <!-- TAHAP 1: CHECK-OUT (SERAH TERIMA AWAL) -->
+                  <div class="mt-4 bg-teal-50/50 border border-teal-100 rounded-lg p-4 space-y-3">
+                    <p class="text-xs font-bold uppercase text-teal-inventra">Tahap 1: Inspeksi Kondisi Awal (Check-Out)</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Unggah Foto Kondisi Awal Barang (Wajib)</label>
+                        <input type="file" id="foto-awal-${trx.id}" accept="image/*" class="w-full text-xs bg-white border border-slate-300 rounded p-1.5" />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Catatan Kelengkapan Fisik</label>
+                        <input type="text" id="catatan-awal-${trx.id}" placeholder="Contoh: Unit mulus, kabel & tas lengkap" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded" />
+                      </div>
+                    </div>
+                    <button onclick="confirmCheckout('${trx.id}')" class="px-4 py-2 bg-teal-inventra hover:bg-teal-inventra-dark text-white rounded-lg text-xs font-semibold">
+                      Setujui Serah-Terima (Kurangi Stok)
+                    </button>
+                  </div>
+                ` : `
+                  <!-- TAHAP 2: CHECK-IN (PENGEMBALIAN BARANG) -->
+                  <div class="mt-4 bg-blue-50/50 border border-blue-100 rounded-lg p-4 space-y-3">
+                    <div class="text-xs text-slate-600 bg-white p-2.5 rounded border border-slate-200">
+                      <b>Bukti Kondisi Awal:</b> ${trx.fotoAwal} — <i>"${trx.kondisiAwal}"</i>
+                    </div>
+                    <p class="text-xs font-bold uppercase text-blue-800">Tahap 2: Inspeksi Kondisi Akhir (Check-In Pengembalian)</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Unggah Foto Kondisi Akhir Barang (Wajib)</label>
+                        <input type="file" id="foto-akhir-${trx.id}" accept="image/*" class="w-full text-xs bg-white border border-slate-300 rounded p-1.5" />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Hasil Verifikasi Kondisi Akhir</label>
+                        <select id="kondisi-akhir-${trx.id}" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded">
+                          <option value="Baik (Sesuai Kondisi Awal)">Baik (Sesuai Kondisi Awal)</option>
+                          <option value="Rusak / Perlu Ganti Rugi">Rusak / Perlu Ganti Rugi</option>
+                        </select>
+                      </div>
+                    </div>
+                    <button onclick="confirmCheckin('${trx.id}')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold">
+                      Konfirmasi Barang Kembali (Kembalikan Stok)
+                    </button>
+                  </div>
+                `}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      if (tab === 'laporan') {
+        subtitle.textContent = 'Manajemen Data Master Barang & Rekapitulasi Laporan Transaksi';
+        container.innerHTML = `
+          <div class="space-y-6">
+            <!-- Form Tambah Master Inventaris -->
+            <form onsubmit="addMasterItem(event)" class="p-4 border border-slate-200 rounded-xl bg-slate-50 grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Barang Baru</label>
+                <input type="text" id="new-item-name" required placeholder="Contoh: Mic Wireless Shure" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori</label>
+                <select id="new-item-cat" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs">
+                  <option>Proyektor</option>
+                  <option>Kamera</option>
+                  <option>Sound System</option>
+                  <option>Lighting</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Stok</label>
+                <input type="number" id="new-item-stok" min="1" value="2" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs" />
+              </div>
+              <button type="submit" class="py-2 px-4 bg-teal-inventra text-white rounded-lg text-xs font-semibold hover:bg-teal-inventra-dark">
+                + Tambah Inventaris
+              </button>
+            </form>
+
+            <!-- Rekap Riwayat Transaksi & Export -->
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+              <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-sm text-slate-800">Rekapitulasi Riwayat Transaksi</h3>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-teal-inventra text-white rounded-lg text-xs font-semibold">
+                  Cetak / Export Laporan (PDF)
+                </button>
+              </div>
+              <table class="w-full text-left border-collapse text-sm">
+                <thead class="bg-slate-50/50 border-b border-slate-200 text-xs uppercase text-slate-500">
+                  <tr>
+                    <th class="p-3.5">ID</th>
+                    <th class="p-3.5">Peminjam</th>
+                    <th class="p-3.5">Barang</th>
+                    <th class="p-3.5">Status</th>
+                    <th class="p-3.5">Catatan Inspeksi Akhir</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  ${dbPeminjaman.map(t => `
+                    <tr>
+                      <td class="p-3.5 text-xs font-mono">${t.id}</td>
+                      <td class="p-3.5 font-medium">${t.peminjam}</td>
+                      <td class="p-3.5">${t.itemName} (${t.qty})</td>
+                      <td class="p-3.5">${renderStatusBadge(t.status)}</td>
+                      <td class="p-3.5 text-xs text-slate-500">${t.kondisiAkhir || '-'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // F. AKSI ADMIN (APPROVAL, CHECK-OUT, CHECK-IN, MASTER DATA)
+    // ---------------------------------------------------------------------
+    function approveRequest(trxId) {
+      const trx = dbPeminjaman.find(t => t.id === trxId);
+      if (trx) {
+        trx.status = 'Disetujui';
+        alert(`✅ Permohonan ${trx.id} DISETUJUI!\nPengingat otomatis H-1 & Hari-H disinkronkan ke Google Calendar peminjam.`);
+        navigateTo('pengajuan');
+      }
+    }
+
+    function rejectRequest(trxId) {
+      const reason = prompt('Masukkan alasan penolakan permohonan:');
+      if (reason !== null) {
+        const trx = dbPeminjaman.find(t => t.id === trxId);
+        trx.status = 'Ditolak';
+        trx.alasanTolak = reason || 'Berkas perizinan tidak memenuhi syarat.';
+        navigateTo('pengajuan');
+      }
+    }
+
+    function confirmCheckout(trxId) {
+      const fileEl = document.getElementById(`foto-awal-${trxId}`);
+      const noteEl = document.getElementById(`catatan-awal-${trxId}`);
+      if (!fileEl.files.length) {
+        alert('⚠️ Aturan Bisnis AB-04: Wajib mengunggah minimal 1 foto kondisi awal barang sebelum serah-terima!');
+        return;
+      }
+
+      const trx = dbPeminjaman.find(t => t.id === trxId);
+      const item = dbInventaris.find(i => i.id === trx.itemId);
+
+      trx.fotoAwal = fileEl.files[0].name;
+      trx.kondisiAwal = noteEl.value || 'Kondisi fisik baik & lengkap';
+      trx.status = 'Sedang Dipinjam';
+      item.available = Math.max(0, item.available - trx.qty);
+
+      alert(`📦 Serah-terima berhasil! Status berubah menjadi "Sedang Dipinjam" dan stok ${item.name} berkurang menjadi ${item.available} unit.`);
+      navigateTo('dipinjamkan');
+    }
+
+    function confirmCheckin(trxId) {
+      const fileEl = document.getElementById(`foto-akhir-${trxId}`);
+      const condEl = document.getElementById(`kondisi-akhir-${trxId}`);
+      if (!fileEl.files.length) {
+        alert('⚠️ Aturan Bisnis AB-05: Wajib mengunggah foto kondisi pengembalian akhir sebelum menyelesaikan transaksi!');
+        return;
+      }
+
+      const trx = dbPeminjaman.find(t => t.id === trxId);
+      const item = dbInventaris.find(i => i.id === trx.itemId);
+
+      trx.fotoAkhir = fileEl.files[0].name;
+      trx.kondisiAkhir = condEl.value;
+      trx.status = 'Selesai';
+      item.available = Math.min(item.total, item.available + trx.qty);
+
+      alert(`✅ Pengembalian selesai! Stok ${item.name} bertambah kembali menjadi ${item.available} unit.`);
+      navigateTo('dipinjamkan');
+    }
+
+    function addMasterItem(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-item-name').value;
+      const category = document.getElementById('new-item-cat').value;
+      const total = parseInt(document.getElementById('new-item-stok').value);
+
+      dbInventaris.push({
+        id: 'INV-0' + (dbInventaris.length + 1),
+        name,
+        category,
+        total,
+        available: total,
+        condition: 'Baik',
+        img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=400&q=80'
+      });
+      navigateTo('laporan');
+    }
+
+    // ---------------------------------------------------------------------
+    // G. KOMPONEN BANTU (BADGE & MODAL BUKTI TANPA QR CODE)
+    // ---------------------------------------------------------------------
+    function renderStatusBadge(status) {
+      const styles = {
+        'Menunggu Persetujuan': 'bg-amber-100 text-amber-800',
+        'Disetujui': 'bg-emerald-100 text-emerald-800',
+        'Sedang Dipinjam': 'bg-blue-100 text-blue-800',
+        'Selesai': 'bg-slate-200 text-slate-700',
+        'Ditolak': 'bg-red-100 text-red-700',
+        'Dibatalkan': 'bg-slate-100 text-slate-500'
+      };
+      return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold ${styles[status] || 'bg-slate-100'}">${status}</span>`;
+    }
+
+    function openSpmjModal(trxId) {
+      const trx = dbPeminjaman.find(t => t.id === trxId);
+      document.getElementById('modal-title').textContent = `Pratinjau Dokumen Perizinan (${trx.id})`;
+      document.getElementById('modal-print-btn').classList.add('hidden');
+      document.getElementById('modal-body').innerHTML = `
+        <div class="p-4 bg-slate-50 border rounded-lg space-y-2">
+          <p><b>Nama Berkas:</b> ${trx.spmjFile}</p>
+          <p><b>Pemohon:</b> ${trx.peminjam}</p>
+          <p><b>Kegiatan:</b> ${trx.kegiatan}</p>
+          <p><b>Barang:</b> ${trx.itemName} (${trx.qty} Unit)</p>
+          <p><b>Rentang Waktu:</b> ${trx.tglPinjam} s.d. ${trx.tglKembali}</p>
+        </div>
+      `;
+      document.getElementById('modal-overlay').classList.remove('hidden');
+    }
+
+    function openBuktiModal(trxId) {
+      const trx = dbPeminjaman.find(t => t.id === trxId);
+      document.getElementById('modal-title').textContent = 'Bukti Persetujuan Peminjaman INVENTRA';
+      document.getElementById('modal-print-btn').classList.remove('hidden');
+      document.getElementById('modal-body').innerHTML = `
+        <div class="p-5 border-2 border-teal-inventra rounded-xl space-y-2 bg-teal-50/20">
+          <div class="flex justify-between items-center border-b pb-2">
+            <span class="font-bold text-teal-inventra">INVENTRA — UNSIL</span>
+            <span class="font-mono text-xs font-bold">${trx.id}</span>
+          </div>
+          <p><b>Peminjam:</b> ${trx.peminjam}</p>
+          <p><b>Barang:</b> ${trx.itemName} (${trx.qty} Unit)</p>
+          <p><b>Jadwal:</b> ${trx.tglPinjam} s.d. ${trx.tglKembali}</p>
+          <p><b>Status Otorisasi:</b> ${trx.status}</p>
+          <p class="text-xs text-slate-500 pt-2 border-t">
+            * Tunjukkan bukti transaksi ini kepada Pengurus Piket di sekretariat untuk verifikasi serah-terima dan inspeksi foto kondisi fisik.
+          </p>
+        </div>
+      `;
+      document.getElementById('modal-overlay').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.add('hidden');
+    }
+
+    // Inisialisasi Ikon Awal
+    lucide.createIcons();
+  </script>
+</body>
+</html>
